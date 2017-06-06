@@ -1,0 +1,87 @@
+#
+# Hercules Emulator Control file...
+# Description: 
+# MaxShutdownSecs: 15
+#
+#
+# System parameters
+#
+
+ARCHMODE  z/Arch
+ALRF      ENABLE
+CCKD      RA=2,RAQ=4,RAT=2,WR=2,GCINT=5,GCPARM=0,NOSTRESS=0,TRACE=0,FREEPEND=-1
+CNSLPORT  23
+CONKPALV  (3,1,10)
+CPUMODEL  3090
+CPUSERIAL 012345
+DIAG8CMD  ENABLE
+ECPSVM    YES
+#LOADPARM  0A95CSM1
+LOADPARM  0A95AC..
+#LOADPARM  0A95DC..
+LPARNAME  HERCULES
+MAINSIZE  1024
+MOUNTED_TAPE_REINIT  DISALLOW
+NUMCPU    4
+OSTAILOR  Z/OS
+PANRATE   80
+PGMPRDOS  LICENSED
+SHCMDOPT  NODIAG8
+SYSEPOCH  1900
+TIMERINT  50
+TZOFFSET  +1400
+YROFFSET  0
+
+HERCPRIO  0
+TODPRIO   -20
+DEVPRIO   8
+CPUPRIO   0
+PANTITLE  z/OS 1.9 IPL A80?
+
+HTTPPORT 8081 NOAUTH
+HTTPROOT /usr/share/hercules/
+
+# Networking
+
+0E20.2  LCS  -n /dev/net/tun  192.168.1.222
+#0E20-0E21 LCS 192.168.1.222
+
+# Display Terminals
+
+0700    3270
+0701    3270
+0702    3270
+0703    3270
+0704    3270
+
+# DASD Devices
+
+0A81    3390    /home/reinoso/ibm_zos_110/cckd/zares1.cckd sf=/home/reinoso/ibm_zos_110/shadow/zares1_*
+0A82    3390    /home/reinoso/ibm_zos_110/cckd/zares2.cckd sf=/home/reinoso/ibm_zos_110/shadow/zares2_*
+0A83    3390    /home/reinoso/ibm_zos_110/cckd/zadb81.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadb81_*
+0A84    3390    /home/reinoso/ibm_zos_110/cckd/zadb82.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadb82_*
+0A85    3390    /home/reinoso/ibm_zos_110/cckd/zadb83.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadb83_*
+0A86    3390    /home/reinoso/ibm_zos_110/cckd/zadb84.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadb84_*
+0A87    3390    /home/reinoso/ibm_zos_110/cckd/zadb91.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadb91_*
+0A88    3390    /home/reinoso/ibm_zos_110/cckd/zadb92.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadb92_*
+0A89    3390    /home/reinoso/ibm_zos_110/cckd/zacic1.cckd sf=/home/reinoso/ibm_zos_110/shadow/zacic1_*
+0A8A    3390    /home/reinoso/ibm_zos_110/cckd/zadis1.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadis1_*
+0A8B    3390    /home/reinoso/ibm_zos_110/cckd/zadis2.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadis2_*
+0A8C    3390    /home/reinoso/ibm_zos_110/cckd/zadis3.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadis3_*
+0A8D    3390    /home/reinoso/ibm_zos_110/cckd/zadis4.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadis4_*
+0A8E    3390    /home/reinoso/ibm_zos_110/cckd/zadis5.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadis5_*
+0A8F    3390    /home/reinoso/ibm_zos_110/cckd/zadis6.cckd sf=/home/reinoso/ibm_zos_110/shadow/zadis6_*
+0A90    3390    /home/reinoso/ibm_zos_110/cckd/zaims1.cckd sf=/home/reinoso/ibm_zos_110/shadow/zaims1_*
+0A91    3390    /home/reinoso/ibm_zos_110/cckd/zaprd1.cckd sf=/home/reinoso/ibm_zos_110/shadow/zaprd1_*
+0A92    3390    /home/reinoso/ibm_zos_110/cckd/zaprd2.cckd sf=/home/reinoso/ibm_zos_110/shadow/zaprd2_*
+0A93    3390    /home/reinoso/ibm_zos_110/cckd/zaprd3.cckd sf=/home/reinoso/ibm_zos_110/shadow/zaprd3_*
+0A94    3390    /home/reinoso/ibm_zos_110/cckd/zaprd4.cckd sf=/home/reinoso/ibm_zos_110/shadow/zaprd4_*
+0A95    3390    /home/reinoso/ibm_zos_110/cckd/zasys1.cckd sf=/home/reinoso/ibm_zos_110/shadow/zasys1_*
+0A96    3390    /home/reinoso/ibm_zos_110/cckd/zauss1.cckd sf=/home/reinoso/ibm_zos_110/shadow/zauss1_*
+0A97    3390    /home/reinoso/ibm_zos_110/cckd/zawas1.cckd sf=/home/reinoso/ibm_zos_110/shadow/zawas1_*
+0A98    3390    /home/reinoso/ibm_zos_110/cckd/zawas2.cckd sf=/home/reinoso/ibm_zos_110/shadow/zawas2_*
+0A99    3390    /home/reinoso/ibm_zos_110/cckd/zawas3.cckd sf=/home/reinoso/ibm_zos_110/shadow/zawas3_*
+0A9A    3390    /home/reinoso/ibm_zos_110/cckd/sares1.cckd sf=/home/reinoso/ibm_zos_110/shadow/sares1_*
+0A9B    3390    /home/reinoso/zos_my_disks/usr001.cckd sf=/home/reinoso/zos_my_disks/usr001_*
+0A9C    3390    /home/reinoso/zos_my_disks/tmp001.cckd sf=/home/reinoso/zos_my_disks/tmp001_*
+0A9D    3390    /home/reinoso/zos_my_disks/bak001.cckd sf=/home/reinoso/zos_my_disks/bak001_*

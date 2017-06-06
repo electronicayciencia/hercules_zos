@@ -1,0 +1,323 @@
+Inicio
+------
+
+Configurar Maq virtual con 2Gb de RAM y 30Gb de disco.
+
+Instalar hercules.
+
+Copiar y configurar el ADCD de zOS 1.10.
+
+Hacer el IPL como pone abajo.
+
+Cuando todo funcione, para arrancar hércules al inicio de la máuqina.
+
+En /etc/crontab poner: 
+@reboot root /home/reinoso/ibm_zos_110/hercules.sh
+
+Contenido de hercules.sh:
+
+ #/bin/sh
+ 
+ export HERCULES_RC=/home/reinoso/ibm_zos_110/hercules.rc
+ 
+ /usr/bin/hercules -f /home/reinoso/ibm_zos_110/hercules.cnf > /home/reinoso/hercules.log
+
+Contenido de hercules.rc:
+
+ IPL A81
+
+
+
+
+Arranque
+--------
+
+
+Iniciar Hercules
+
+Iniciar 3270.
+
+La primera vez (arranque en frío):
+
+	En hercules:
+	> LOADPARM 0A95CS..
+	> IPL A81
+
+	(arranque)
+
+	En 3270, cuando pregunte:
+	R 00,I (La respuesta a la pregunta 00 es I)
+
+	(esperar a Initialization completeed at...)
+
+La siguiente vez arrancar con 0A95DC.. para arranque en frío de CICS y DB2.
+
+Las siguientes veces (arranque en caliente con CICS y DB2):
+	> LOADPARM 0A95DBM1
+	> IPL A81
+
+
+Iniciar otro 3270.
+
+LOGON IBMUSER pass SYS1
+
+
+Apagado
+-------
+
+En el 3270 nº1
+
+S SHUTDOWN
+(esperar a que termine)
+
+Z EOD
+
+
+Para recuperar la Master Console en Hercules:
+ Abrir 3270 en 700.
+ Ir a SDSF
+ Comando: /v 700,console
+
+Para cancelar la sesión activa cuando no deja reconectar:
+ m.5
+ /c u=userid
+
+
+Red
+---
+
+Conf en hercules.cnf:
+ 0E20.2  LCS  -d -n /dev/net/tun  192.168.1.222
+
+En linux:
+ echo 1 > /proc/sys/net/ipv4/ip_forward
+ echo 1 > /proc/sys/net/ipv4/conf/tap0/proxy_arp
+ echo 1 > /proc/sys/net/ipv4/conf/ens33/proxy_arp
+
+En zOS:
+
+Mirar en "iplparm" el profile de tcp que se usará.
+Modificarlo en ADCD.Z110.TCPPARMS:
+ DEVICE LCS1   LCS       E20
+ LINK   ETH1   ETHERNET  0    LCS1
+ HOME
+   192.168.1.222  ETH1
+
+ GATEWAY
+  192.168.1.1 =         ETH1    1492 HOST
+  defaultnet 192.168.1.1     ETH1  1492  0
+
+ BEGINROUTES
+ ROUTE  192.168.1.0  255.255.255.0  =            ETH1  MTU 1492
+ ROUTE  DEFAULT                     192.168.1.1  ETH1  MTU 1492
+ ENDROUTES
+
+ START LCS1
+
+
+Para apagar o encender la red:
+ s tcpip
+ p tcpip
+
+
+Compilar
+--------
+
+Crear tres partitioned datasets:
+ REINOSO.TEST.COBOL    (RECFMT=F,LRECL=80)
+ REINOSO.TEST.JCLLIB   (RECFMT=F,LRECL=80)
+ REINOSO.TEST.LOADLIB  (RECFMT=U)
+
+Crear REINOSO.TEST.COBOL(PROG1). Fuente COBOL:
+
+ 000100* PRUEBA CON FIXED FORMAT
+ 000200 IDENTIFICATION DIVISION.
+ 000300 PROGRAM-ID. PROG1.
+ 000400
+ 000500 PROCEDURE DIVISION.
+ 000600     DISPLAY 'COBOL Sucks!'.
+ 000700     STOP RUN.
+
+
+Crear REINOSO.TEST.JCLLIB(COMPILE):
+
+ //IBMUSERC JOB  CLASS=A,NOTIFY=&SYSUID
+ //***************************************************
+ //*   JCL TO COMPILE A SIMPLE COBOL PROGRAM
+ //***************************************************
+ //COMP     EXEC IGYWCL,
+ //         PGMLIB=REINOSO.TEST.LOADLIB,
+ //         GOPGM=PROG1
+ //* HAY QUE INDICAR LA LIB PORQUE NO ESTA EN SYS1.LINKLIB
+ //STEPLIB  DD   DSN=IGY410.SIGYCOMP,DISP=SHR
+ //COBOL.SYSIN    DD   DSN=REINOSO.TEST.COBOL(PROG1),DISP=SHR
+
+
+Crear REINOSO.TEST.JCLLIB(RUNCOBOL):
+
+ //IBMUSERC   JOB  CLASS=A,NOTIFY=&SYSUID
+ //***************************************************
+ //*   JCL TO RUN A SIMPLE COBOL PROGRAM
+ //***************************************************
+ //JOBLIB     DD   DSN=REINOSO.TEST.LOADLIB,DISP=SHR
+ //STEP01     EXEC PGM=PROG1
+ //SYSOUT     DD   SYSOUT=*
+
+
+Crear REINOSO.TEST.JCLLIB(CLG): (Compile, Link and Go)
+
+ //IBMUSERC JOB CLASS=A,NOTIFY=&SYSUID
+ //***************************************************
+ //*   JCL TO COMPILE AND RUN A SIMPLE COBOL PROGRAM
+ //***************************************************
+ //STEP1    EXEC IGYWCLG
+ //STEPLIB  DD   DSN=IGY410.SIGYCOMP,DISP=SHR
+ //COBOL.SYSIN  DD  DSN=REINOSO.TEST.COBOL(PROG1),DISP=SHR
+
+
+
+Borrar jobs en el SDSF:
+
+poner //P en el primero a borrar
+poner // en el último del bloque.
+
+
+Paneles de ISPF:
+ **.ispplib
+
+
+-------------------------------
+CICS
+-------------------------------
+
+Crear programa para la transacción:
+
+***************************************************************  
+* PRIMER PROGRAMA CICS                                          
+* 07/06/2017                                                     
+* REINOSO G.                                                     
+***************************************************************  
+                                                                 
+ IDENTIFICATION DIVISION.                                        
+ PROGRAM-ID. HELLO.                                             
+                                                                 
+ DATA DIVISION.                                                  
+ WORKING-STORAGE SECTION.                                        
+  01 WS-MESSAGE    PIC X(40).                                    
+                                                                 
+ PROCEDURE DIVISION.                                         
+      MOVE 'BYE BYE WORLD' TO WS-MESSAGE.                    
+                                                             
+      EXEC CICS SEND TEXT                                    
+          FROM (WS-MESSAGE)                                  
+      END-EXEC.                                              
+                                                             
+      EXEC CICS RETURN                                       
+      END-EXEC.                                              
+                                                             
+      STOP RUN.                                              
+
+
+
+Compilar una transacción:
+
+ //IBMUSERC   JOB   CLASS=A,NOTIFY=&SYSUID                       
+ //***************************************************           
+ //*   JCL TO COMPILE AND RUN A SIMPLE CICS PROGRAM              
+ //***************************************************           
+ //CICSLIBS   JCLLIB ORDER=DFH320.CICS.SDFHPROC                  
+ //CICSCOMP   EXEC  DFHYITVL,                                    
+ //    LE370HLQ='CEE',                                           
+ //    AD370HLQ='IGY410',                                        
+ //    INDEX='DFH320.CICS',                                      
+ //    PROGLIB='DFH320.CICS.SDFHLOAD',                           
+ //    DSCTLIB='DFH320.CICS.SDFHCOB'                             
+ //TRN.SYSIN  DD    DSN=REINOSO.CICSTEST.COBOL(HELLO),DISP=SHR   
+ //LKED.SYSIN DD *                                               
+     NAME HELLO(R)                                               
+ /*                                                              
+
+Configurar la transacción:
+(previamente crear el grupo CICSGR)
+
+ CEDA DEFINE PROG(HELLO) GROUP(CICSGR)
+ CEDA DEF TRANS (HELL) PROG (HELLO) GROUP (CICSGR)
+ CEDA INSTALL TRA(HELL) GROUP(CICSGR) 
+ CEDA INSTALL PROG(HELLO) GROUP(CICSGR)
+ CEMT SET PROG(HELLO) NEW
+
+
+
+-------------------------------
+Colas MQ
+-------------------------------
+
+El gestor es CSQ7.
+
+--
+En CentOS
+
+Para hacer que no caduque la licencia de prueba es suficiente con
+ir al directorio /var/mqm/qmgrs/@SYSTEM y allí hacer:
+
+ln -s /dev/null amqtrial.inf.Installation1
+
+Para operar las colas: 
+su - mqm
+
+--
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------
+Puertos abiertos:
+--------------------------------------------------------------
+root@herculeszos:~# nmap -p1-15000 192.168.1.222 -O -sV
+
+Starting Nmap 7.40 ( https://nmap.org ) at 2017-06-04 06:13 CEST
+Stats: 0:03:29 elapsed; 0 hosts completed (1 up), 1 undergoing SYN Stealth Scan
+SYN Stealth Scan Timing: About 95.45% done; ETC: 06:17 (0:00:10 remaining)
+Nmap scan report for 192.168.1.222
+Host is up (0.0015s latency).
+Not shown: 14986 closed ports
+PORT      STATE SERVICE   VERSION
+21/tcp    open  ftp       IBM OS/390 ftpd V1R10
+22/tcp    open  ssh       OpenSSH 3.8.1p1 (protocol 2.0)
+23/tcp    open  tn3270    IBM Telnet TN3270 (TN3270E)
+80/tcp    open  http      IBM httpd V5R3M0
+111/tcp   open  rpcbind   2 (RPC #100000)
+513/tcp   open  login?
+1023/tcp  open  telnet    BSD-derived telnetd
+1026/tcp  open  mountd    1-3 (RPC #100005)
+1027/tcp  open  mvsmount  1 (RPC #100044)
+1028/tcp  open  showattrd 2 (RPC #100059)
+2049/tcp  open  nfs       2-4 (RPC #100003)
+5025/tcp  open  drda      IBM DB2 Database Server (QDB2)
+5026/tcp  open  drda      IBM DB2 Database Server (QDB2)
+10007/tcp open  echolink  EchoLink radio-over-VoIP
+MAC Address: 9A:2B:38:E5:F7:AE (Unknown)
+Device type: general purpose
+Running: IBM z/OS 1.10.X
+OS CPE: cpe:/o:ibm:zos:1.10
+OS details: IBM z/OS 1.10
+Network Distance: 1 hop
+Service Info: Host: FTPD1; OS: OS/390; CPE: cpe:/o:ibm:os_390
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 343.49 seconds
+
+--------------------------------------------------------------
+--------------------------------------------------------------
+
+
+
