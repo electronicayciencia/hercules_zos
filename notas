@@ -320,4 +320,28 @@ Nmap done: 1 IP address (1 host up) scanned in 343.49 seconds
 --------------------------------------------------------------
 
 
+Crear un war
+------------
+
+Rutas de JAVA para .tcshrc:
+  setenv JAVA_HOME /usr/lpp/java/J5.0
+  setenv CLASS_PATH /Z110/usr/lpp/db2/db2810/classes/db2j2classes.zip
+  setenv PATH $JAVA_HOME/bin:$PATH
+
+Poner la opción M en el comando jar porque si no aunque pongas m insiste en crear un Manifest.
+Tagear el Manifest porque si no lo va a poner en EBCDIC:
+
+  ADCD:~> ls -T gg
+  - untagged    T=off -rw-r--r--   1 OMVSKERN SYS1           0 Oct  8 17:47 gg
+  ADCD:~> chtag -t -c ISO8859-1 gg
+  ADCD:~> ls -T gg
+  t ISO8859-1   T=on  -rw-r--r--   1 OMVSKERN SYS1           0 Oct  8 17:47 gg
+
+  ADCD:~/java/META-INF> ls -T MANIFEST.MF
+  t ISO8859-1   T=on  -rw-r--r--   1 JOHN     EMPLOYEE      41 Oct  8 18:04 MANIFEST.MF
+
+Activar la opción de conversión automática 
+  setenv _BPXK_AUTOCVT ON
+
+
 
