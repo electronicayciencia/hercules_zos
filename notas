@@ -344,4 +344,17 @@ Activar la opción de conversión automática
   setenv _BPXK_AUTOCVT ON
 
 
+ABEND en ISPF
+-------------
+
+ ISPV011 PROFILE TABLE NOT FOUND - UNABLE TO ACCESS
+      DGT3PROF  TABLE FOR   VARIABLE ZERRMSG
+ (it may be any DGTxPROF member)
+
+Additional resolution to above error:
+Increase size and number of directory blocks allocated to user's
+ISPF profile dataset.
+
+Buscar <USER>.ISP.ISPPROF, estará lleno y no puede crear más miembros,por eso no carga el panel. 
+Ampliarlo, comprimirlo o borrar algún miembro no usado.
 
