@@ -358,3 +358,28 @@ ISPF profile dataset.
 Buscar <USER>.ISP.ISPPROF, estará lleno y no puede crear más miembros,por eso no carga el panel. 
 Ampliarlo, comprimirlo o borrar algún miembro no usado.
 
+
+
+COBOL Revisitado  (15/04/2019)
+----------------
+
+Simplemente hay que añadir el parámetro con el prefijo de los archivos del compilador, que por defecto viene mal.
+//JOHNCLG      JOB                                      
+//CLG          EXEC IGYWCLG,LNGPRFX=IGY410              
+//COBOL.SYSIN  DD   DSN=JOHN.PROJ1.COBOL(HELLO),DISP=SHR
+
+Con eso es suficiente. Por defecto viene a IGY.V4R1M0 y no encuentra los datasets.
+
+Para ver el procedimiento, por ejemplo:
+  TSO ISRDDN
+  Buscamos la concatenación SYSPROC
+  Buscamos dentro los procedimientos IGYxxxx, por ejemplo IGYWCLG.
+  Dentro del procedimiento, la linea 
+    //STEPLIB  DD  DSNAME=&LNGPRFX..SIGYCOMP
+
+Vamos a 3.4 y buscamos datasets con SIGYCOMP.
+Sólo está IGY410.SIGYCOMP, luego el prefijo debe ser IGY410.
+
+
+
+
